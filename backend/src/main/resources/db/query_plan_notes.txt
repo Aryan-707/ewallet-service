@@ -1,0 +1,9 @@
+Query Plan Analysis for Ledger Query:
+
+Without Index (Seq Scan):
+A query like `SELECT SUM(amount) FROM ledger_entry WHERE wallet_id = ? AND type = 'CREDIT'` will have to scan the entire `ledger_entry` table because PostgreSQL has no quick way to locate all rows belonging to a specific wallet. As the number of transactions grows over time, this Sequential Scan becomes extremely costly and slows down the `getBalance()` implementation entirely.
+
+With Index (Index Scan):
+By adding `CREATE INDEX idx_ledger_wallet_id ON ledger_entry(wallet_id);`, PostgreSQL creates a B-Tree index on the `wallet_id` column. When the query executes, the query planner chooses an Index Scan or Bitmap Index Scan. It traverses the B-Tree to instantly find the memory blocks that hold rows for the given `wallet_id`. It then fetches only those specific pages from disk, drastically reducing I/O and computing time.
+
+This ensures our dynamically derived ledger balance calculation maintains O(log N) lookup time regardless of the overall table size, enabling "fintech-grade" read performance to match the write consistencies! 
