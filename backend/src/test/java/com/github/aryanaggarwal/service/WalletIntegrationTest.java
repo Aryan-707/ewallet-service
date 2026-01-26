@@ -179,7 +179,11 @@ class WalletIntegrationTest {
         // (not create a duplicate)
         walletService.transferFunds(request);
 
-        // Verify only ONE debit ledger entry exists for wallet A beyond the seed
+        // Verify only ONE transaction was created with this idempotency key
+        assertTrue(transactionRepository.findByIdempotencyKey(idempotencyKey).isPresent(),
+                "Exactly one transaction should exist with this idempotency key");
+
+        // Alternatively, verify exactly one debit ledger entry exists for wallet A beyond the seed
         long debitCount = ledgerEntryRepository.findAll().stream()
                 .filter(le -> le.getWallet().getId().equals(walletA.getId()))
                 .filter(le -> "DEBIT".equals(le.getType()))

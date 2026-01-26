@@ -200,6 +200,9 @@ public class WalletService {
             }
         }
         final Wallet toWallet = getByIban(request.getToWalletIban());
+        // Note: Destination wallet checking is intentionally omitted.
+        // It's correct that you can transfer TO someone else's wallet (e.g., P2P payment),
+        // therefore only the SOURCE wallet requires an ownership gate to verify the sender.
         final Wallet fromWallet = getByIbanWithPessimisticWriteLock(request.getFromWalletIban());
         verifyOwnership(fromWallet); // only source wallet owner can initiate transfer
 
