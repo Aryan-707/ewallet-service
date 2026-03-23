@@ -9,18 +9,23 @@ import com.github.aryanaggarwal.dto.request.TransactionRequest;
 import com.github.aryanaggarwal.dto.request.WalletRequest;
 import com.github.aryanaggarwal.dto.response.CommandResponse;
 import com.github.aryanaggarwal.dto.response.WalletResponse;
+import com.github.aryanaggarwal.dto.response.WalletStatsResponse;
 import com.github.aryanaggarwal.exception.ElementAlreadyExistsException;
 import com.github.aryanaggarwal.exception.InsufficientBalanceException;
 import com.github.aryanaggarwal.exception.RateLimitExceededException;
 import com.github.aryanaggarwal.exception.WalletNotFoundException;
 import com.github.aryanaggarwal.exception.NoSuchElementFoundException;
 import com.github.aryanaggarwal.repository.LedgerEntryRepository;
+import com.github.aryanaggarwal.repository.TransactionRepository;
+import com.github.aryanaggarwal.repository.UserRepository;
 import com.github.aryanaggarwal.repository.WalletRepository;
 import com.github.aryanaggarwal.validator.IbanValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
@@ -40,6 +45,8 @@ public class WalletService {
     private final MessageSourceConfig messageConfig;
     private final WalletRepository walletRepository;
     private final LedgerEntryRepository ledgerEntryRepository;
+    private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
     private final TransactionService transactionService;
     private final WalletRequestMapper walletRequestMapper;
     private final WalletResponseMapper walletResponseMapper;
@@ -49,6 +56,22 @@ public class WalletService {
     private final BalanceService balanceService;
 
     /**
+     * Prevents horizontal privilege escalation by verifying the
+     * authenticated user owns the wallet being accessed.
+     */
+    private void verifyOwnership(Wallet wallet) {
+        String currentUser = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName(); // username from JWT
+        if (!wallet.getUser().getUsername().equals(currentUser)) {
+            throw new AccessDeniedException(
+                    "You do not own this wallet"
+            ); // 403 — prevents accessing another user's wallet
+        }
+    }
+
+    /**
      * Fetches a single wallet by the given id.
      *
      * @param id
@@ -56,9 +79,10 @@ public class WalletService {
      */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public WalletResponse findById(long id) {
-        return walletRepository.findById(id)
-                .map(walletResponseMapper::toWalletResponse)
+        Wallet wallet = walletRepository.findById(id)
                 .orElseThrow(() -> new WalletNotFoundException(messageConfig.getMessage(ERROR_WALLET_NOT_FOUND)));
+        verifyOwnership(wallet); // ownership gate
+        return walletResponseMapper.toWalletResponse(wallet);
     }
 
     /**
@@ -108,6 +132,18 @@ public class WalletService {
         // needs the lock first or we get phantom reads
         return walletRepository.findByIbanWithPessimisticWriteLock(iban)
                 .orElseThrow(() -> new WalletNotFoundException(messageConfig.getMessage(ERROR_WALLET_NOT_FOUND)));
+    }
+
+    /**
+     * Returns total stats for the dashboard.
+     */
+    @Transactional(readOnly = true)
+    public WalletStatsResponse getStats() {
+        return new WalletStatsResponse(
+                walletRepository.count(),
+                transactionRepository.count(),
+                userRepository.count()
+        );
     }
 
     /**
@@ -165,6 +201,7 @@ public class WalletService {
         }
         final Wallet toWallet = getByIban(request.getToWalletIban());
         final Wallet fromWallet = getByIbanWithPessimisticWriteLock(request.getFromWalletIban());
+        verifyOwnership(fromWallet); // only source wallet owner can initiate transfer
 
         if (redisService.isRateLimited(fromWallet.getUser().getId())) {
             throw new RateLimitExceededException(messageConfig.getMessage(ERROR_RATE_LIMIT_EXCEEDED));
@@ -229,6 +266,7 @@ public class WalletService {
             }
         }
         final Wallet fromWallet = getByIbanWithPessimisticWriteLock(request.getFromWalletIban());
+        verifyOwnership(fromWallet); // only wallet owner can withdraw
 
         // check if the balance of sender wallet has equal or higher to/than transfer amount
         java.math.BigDecimal fromBalance = balanceService.getBalance(fromWallet.getId());
@@ -255,6 +293,7 @@ public class WalletService {
     public CommandResponse update(long id, WalletRequest request) {
         final Wallet foundWallet = walletRepository.findById(id)
                 .orElseThrow(() -> new WalletNotFoundException(messageConfig.getMessage(ERROR_WALLET_NOT_FOUND)));
+        verifyOwnership(foundWallet); // ownership gate
 
         // check if the iban is changed and new iban is already exists
         if (!request.getIban().equalsIgnoreCase(foundWallet.getIban()) &&
@@ -283,6 +322,7 @@ public class WalletService {
     public void deleteById(long id) {
         final Wallet wallet = walletRepository.findById(id)
                 .orElseThrow(() -> new WalletNotFoundException(messageConfig.getMessage(ERROR_WALLET_NOT_FOUND)));
+        verifyOwnership(wallet); // ownership gate
         walletRepository.delete(wallet);
         log.info(messageConfig.getMessage(INFO_WALLET_DELETED, wallet.getIban(), wallet.getName(), ledgerEntryRepository.getBalance(wallet.getId())));
     }

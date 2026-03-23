@@ -1,6 +1,4 @@
 spring:
-  config:
-    import: optional:file:.env.properties # read environment variables from .env file
   application:
     name: e-wallet
   main:
@@ -14,9 +12,9 @@ spring:
     date-format: 'dd.MM.yyyy'
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/${db_name}
-    username: ${db_username}
-    password: ${db_password}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   data:
     redis:
       host: ${redis_host:localhost}
@@ -74,5 +72,5 @@ exception:
 
 app:
   security:
-    jwtSecret: ${jwt_secret}
+    jwtSecret: ${JWT_SECRET}
     jwtExpirationMs: 3600000

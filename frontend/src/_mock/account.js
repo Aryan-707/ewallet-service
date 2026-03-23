@@ -1,6 +1,6 @@
 const account = {
-  displayName: 'Jaydon Frankie',
-  email: 'demo@minimals.cc',
+  displayName: 'Aryan Aggarwal',
+  email: 'aryan@ewallet.com',
   photoURL: '/assets/images/avatars/avatar_default.png',
 };
 

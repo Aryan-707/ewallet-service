@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "e-wallet REST API", version = "1.0",
         description = "Application used for a digital wallet",
-        contact = @Contact(name = "Murat Yıldız")),
+        contact = @Contact(name = "Aryan Aggarwal",
+                email = "aryan@ewallet.com")), // project maintainer contact
         security = {@SecurityRequirement(name = "bearerToken")}
 )
 @SecurityScheme(name = "bearerToken", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")

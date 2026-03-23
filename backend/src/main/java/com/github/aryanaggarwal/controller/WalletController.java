@@ -4,6 +4,7 @@ import com.github.aryanaggarwal.dto.request.TransactionRequest;
 import com.github.aryanaggarwal.dto.request.WalletRequest;
 import com.github.aryanaggarwal.dto.response.CommandResponse;
 import com.github.aryanaggarwal.dto.response.WalletResponse;
+import com.github.aryanaggarwal.dto.response.WalletStatsResponse;
 import com.github.aryanaggarwal.service.WalletService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,12 @@ import java.util.List;
 public class WalletController {
 
     private final WalletService walletService;
+
+    @GetMapping("/stats")
+    public ResponseEntity<WalletStatsResponse> getStats() {
+        return ResponseEntity.ok(walletService.getStats());
+    }
+
 
     /**
      * Fetches a single wallet by the given id.

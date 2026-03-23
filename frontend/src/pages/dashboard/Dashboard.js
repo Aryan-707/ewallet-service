@@ -1,12 +1,26 @@
 import { Container, Grid, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { AppWidgetSummary } from '../../sections/@dashboard/app';
+import HttpService from '../../services/HttpService';
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalWallets: 0,
+    totalTransactions: 0,
+    totalUsers: 0
+  });
+
+  useEffect(() => {
+    HttpService.getWithAuth('/wallets/stats')
+      .then(res => setStats(res.data))
+      .catch(err => console.error('Stats fetch failed', err));
+  }, []);
+
   return (
     <>
       <Helmet>
-        <title> Dashboard | Minimal UI </title>
+        <title> Dashboard | e-Wallet </title>
       </Helmet>
       <Container maxWidth="xl">
         <Typography variant="h4" sx={{ mb: 5 }}>
@@ -14,28 +28,17 @@ export default function Dashboard() {
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Wallets" total={714000} icon={'ant-design:wallet-outlined'} />
-            <Typography variant="body2" sx={{ my: 2 }}>
-              (*) based on mock data
-            </Typography>
+            <AppWidgetSummary title="Wallets" total={stats.totalWallets} icon={'ant-design:wallet-outlined'} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Users" total={253000} color="warning" icon={'ant-design:user-outlined'} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary
-              title="Transaction Amount (total)"
-              total={1352831}
-              color="info"
-              icon={'ant-design:transaction-outlined'}
-            />
+            <AppWidgetSummary title="Users" total={stats.totalUsers} color="warning" icon={'ant-design:user-outlined'} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary
               title="Transactions (monthly)"
-              total={123000}
-              color="error"
-              icon={'ant-design:euro-outlined'}
+              total={stats.totalTransactions}
+              color="info"
+              icon={'ant-design:transaction-outlined'}
             />
           </Grid>
         </Grid>

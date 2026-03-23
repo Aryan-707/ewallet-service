@@ -2,6 +2,6 @@
 
 ### v1.0.0
 
-###### March 18, 2023
+###### January 26, 2026
 
-Initial release.
+Initial release — wallet dashboard frontend.

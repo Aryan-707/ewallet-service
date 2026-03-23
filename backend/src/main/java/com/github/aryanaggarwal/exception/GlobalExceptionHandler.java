@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -122,18 +123,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handles custom InsufficientFundsException.
-     *
-     * @param ex
-     * @param request
-     * @return ResponseEntity<Object> with detailed information related to the error
+     * Handles AccessDeniedException for ownership violations.
      */
-    @ExceptionHandler(InsufficientFundsException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-    public ResponseEntity<Object> handleInsufficientFundsException(InsufficientFundsException ex, WebRequest request) {
-        log.error(messageConfig.getMessage(ERROR_METHOD_ARGUMENT, ex));
-        return buildErrorResponse(ex, HttpStatus.PRECONDITION_FAILED, request);
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        log.warn("Access denied: {}", ex.getMessage());
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
     }
+
 
     /**
      * Handles AuthenticationException.
