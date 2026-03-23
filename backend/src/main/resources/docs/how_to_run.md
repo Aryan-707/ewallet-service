@@ -31,7 +31,7 @@ In order to run the application in development mode, apply the following steps:
 2. Open command prompt window and clone the project from GitHub using the following command:
 
 ```shell
-git clone https://github.com/aryanaggarwal/e-wallet.git
+git clone https://github.com/Aryan-707/ewallet-service.git
 ```
 <br/>
 
@@ -118,7 +118,7 @@ In order to run the application in production mode, apply the following steps:
 2. Open command prompt window and clone the project from GitHub using the following command:
 
 ```shell
-git clone https://github.com/aryanaggarwal/e-wallet.git
+git clone https://github.com/Aryan-707/ewallet-service.git
 ```
 <br/>
 
