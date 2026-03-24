@@ -1,0 +1,71 @@
+version: "1"
+
+services:
+  # ------------------------------------------------------------------
+  # Frontend Static Site (React)
+  # ------------------------------------------------------------------
+  - type: web
+    name: e-wallet-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: e-wallet-backend
+          # Render automatically passes the live backend URL to your frontend!
+          property: host
+    
+  # ------------------------------------------------------------------
+  # Backend Web Service (Spring Boot)
+  # ------------------------------------------------------------------
+  - type: web
+    name: e-wallet-backend
+    env: java
+    plan: free
+    rootDir: backend
+    buildCommand: mvn clean install -DskipTests
+    startCommand: java -jar target/e-wallet-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      # Hooking up the Postgres DB automatically generated below
+      - key: DB_URL
+        fromDatabase:
+          name: e-wallet-postgres
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: e-wallet-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: e-wallet-postgres
+          property: password
+      # Redis configuration (Render does NOT have a free Redis tier anymore)
+      # You MUST replace these placeholder values inside the Render Dashboard 
+      # with credentials from a free Upstash (upstash.com) Redis database.
+      - key: SPRING_DATA_REDIS_HOST
+        sync: false
+      # Prevent committing the database password to GitHub!
+      # We use 'sync: false' so Render asks you for the secret during deployment.
+      - key: SPRING_DATA_REDIS_PASSWORD
+        sync: false
+      - key: SPRING_DATA_REDIS_PORT
+        sync: false
+      # Upstash requires TLS for secure connections!
+      - key: SPRING_DATA_REDIS_SSL_ENABLED
+        value: "true"
+
+databases:
+  # ------------------------------------------------------------------
+  # Database (Render Free PostgreSQL)
+  # Expires after 90 days on Free Tier
+  # ------------------------------------------------------------------
+  - name: e-wallet-postgres
+    databaseName: ewallet_db
+    user: postgres
+    plan: free

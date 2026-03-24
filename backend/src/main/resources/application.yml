@@ -17,8 +17,8 @@ spring:
     password: ${DB_PASSWORD}
   data:
     redis:
-      host: ${redis_host:localhost}
-      port: ${redis_port:6379}
+      # Relying on standard Spring autoconfiguration (spring.data.redis.*)
+      # This allows easy URL injection in production (SPRING_DATA_REDIS_URL=rediss://...)
   jpa:
     hibernate:
       ddl-auto: none
