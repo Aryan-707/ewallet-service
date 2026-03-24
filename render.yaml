@@ -12,11 +12,7 @@ services:
     staticPublishPath: build
     envVars:
       - key: REACT_APP_API_URL
-        fromService:
-          type: web
-          name: e-wallet-backend
-          # Render automatically passes the live backend URL to your frontend!
-          property: host
+        value: "e-wallet-backend-m2ch.onrender.com"
     
   # ------------------------------------------------------------------
   # Backend Web Service (Spring Boot)
