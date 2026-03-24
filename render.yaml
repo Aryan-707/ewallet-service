@@ -30,10 +30,18 @@ services:
       - key: JWT_SECRET
         generateValue: true
       # Hooking up the Postgres DB automatically generated below
-      - key: DB_URL
+      - key: DB_HOST
         fromDatabase:
           name: e-wallet-postgres
-          property: connectionString
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: e-wallet-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: e-wallet-postgres
+          property: database
       - key: DB_USERNAME
         fromDatabase:
           name: e-wallet-postgres
