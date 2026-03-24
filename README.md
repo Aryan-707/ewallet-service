@@ -85,7 +85,7 @@ Ensure Docker and Java 17+ are installed.
 docker compose up -d
 
 # 2. Set environment variables
-export DB_URL="jdbc:postgresql://localhost:5432/ewallet_db"
+export DB_URL="postgresql://localhost:5432/ewallet_db"
 export DB_USERNAME="postgres"
 export DB_PASSWORD="yourpassword"
 export JWT_SECRET="your-256-bit-secret-minimum-32-chars"
