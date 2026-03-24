@@ -3,7 +3,9 @@ import axios from './axios';
 const login = (body) => {
   const url = '/auth/login';
   return axios.post(url, body).then((response) => {
-    localStorage.setItem('user', JSON.stringify(response.data.data));
+    if (response.data.token) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
     return response.data;
   });
 };
@@ -17,7 +19,11 @@ const logout = () => {
   localStorage.removeItem('user');
 };
 
-const getCurrentUser = () => JSON.parse(localStorage.getItem('user'));
+const getCurrentUser = () => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr || userStr === 'undefined') return null;
+  return JSON.parse(userStr);
+};
 
 const AuthService = {
   login,
