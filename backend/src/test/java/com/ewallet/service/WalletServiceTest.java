@@ -30,6 +30,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -68,6 +73,15 @@ class WalletServiceTest {
 
     @Mock
     private MessageSourceConfig messageConfig;
+
+    @BeforeEach
+    void setUpSecurity() {
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+        lenient().when(authentication.getName()).thenReturn("testuser");
+        SecurityContextHolder.setContext(securityContext);
+    }
 
     @Test
     void findById_shouldReturnWalletResponse() {
@@ -317,6 +331,7 @@ class WalletServiceTest {
         wallet.setName(name);
         com.ewallet.domain.entity.User user = new com.ewallet.domain.entity.User();
         user.setId(1L);
+        user.setUsername("testuser");
         wallet.setUser(user);
         return wallet;
     }

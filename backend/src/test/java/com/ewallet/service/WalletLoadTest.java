@@ -23,6 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Load test simulation specifically for answering whether the system handles massive spikes of transactions. 
@@ -69,6 +74,7 @@ class WalletLoadTest {
 
         com.ewallet.domain.entity.User user = new com.ewallet.domain.entity.User();
         user.setId(1L);
+        user.setUsername("testuser");
         fromWallet.setUser(user);
 
         when(walletRepository.findByIbanWithPessimisticWriteLock("FROM_LOAD")).thenReturn(Optional.of(fromWallet));
@@ -87,6 +93,11 @@ class WalletLoadTest {
 
         for (int i = 0; i < threads; i++) {
             executor.submit(() -> {
+                SecurityContext securityContext = mock(SecurityContext.class);
+                Authentication authentication = mock(Authentication.class);
+                lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+                lenient().when(authentication.getName()).thenReturn("testuser");
+                SecurityContextHolder.setContext(securityContext);
                 try {
                     TransactionRequest request = new TransactionRequest();
                     request.setFromWalletIban("FROM_LOAD");
