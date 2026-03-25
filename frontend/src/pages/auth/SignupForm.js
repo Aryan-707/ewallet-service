@@ -18,6 +18,7 @@ export default function SignupForm() {
 
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [formValues, setFormValues] = useState(defaultValues);
 
@@ -31,6 +32,7 @@ export default function SignupForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    setLoading(true);
     AuthService.signup(formValues)
       .then((response) => {
         enqueueSnackbar('Signed up successfully', { variant: 'success' });
@@ -41,10 +43,13 @@ export default function SignupForm() {
           error.response?.data?.errors.map((e) => enqueueSnackbar(e.message, { variant: 'error' }));
         } else if (error.response?.data?.message) {
           enqueueSnackbar(error.response?.data?.message, { variant: 'error' });
+        } else if (error.code === 'ECONNABORTED') {
+          enqueueSnackbar('Server is waking up, please try again in a few seconds.', { variant: 'warning' });
         } else {
-          enqueueSnackbar(error.message, { variant: 'error' });
+          enqueueSnackbar(error.message || 'Signup failed. Please try again.', { variant: 'error' });
         }
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -108,9 +113,10 @@ export default function SignupForm() {
         />
       </Stack>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ my: 2 }} />
-      <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleSubmit}>
+      <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={loading} onClick={handleSubmit}>
         Sign up
       </LoadingButton>
     </>
   );
 }
+

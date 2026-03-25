@@ -14,6 +14,7 @@ export default function LoginForm() {
 
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [formValues, setFormValues] = useState(defaultValues);
 
@@ -27,7 +28,12 @@ export default function LoginForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    AuthService.login(formValues)
+    setLoading(true);
+    const payload = {
+      username: formValues.username.trim().toLowerCase(),
+      password: formValues.password,
+    };
+    AuthService.login(payload)
       .then((response) => {
         navigate('/');
       })
@@ -36,10 +42,13 @@ export default function LoginForm() {
           error.response?.data?.errors.map((e) => enqueueSnackbar(e.message, { variant: 'error' }));
         } else if (error.response?.data?.message) {
           enqueueSnackbar(error.response?.data?.message, { variant: 'error' });
+        } else if (error.code === 'ECONNABORTED') {
+          enqueueSnackbar('Server is waking up, please try again in a few seconds.', { variant: 'warning' });
         } else {
-          enqueueSnackbar(error.message, { variant: 'error' });
+          enqueueSnackbar(error.message || 'Login failed. Please try again.', { variant: 'error' });
         }
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -78,9 +87,10 @@ export default function LoginForm() {
 
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ my: 2 }} />
 
-      <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleSubmit}>
+      <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={loading} onClick={handleSubmit}>
         Log in
       </LoadingButton>
     </>
   );
 }
+
