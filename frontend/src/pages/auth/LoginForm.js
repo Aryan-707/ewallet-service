@@ -26,13 +26,8 @@ export default function LoginForm() {
     });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const performLogin = (payload) => {
     setLoading(true);
-    const payload = {
-      username: formValues.username.trim().toLowerCase(),
-      password: formValues.password,
-    };
     AuthService.login(payload)
       .then((response) => {
         navigate('/');
@@ -49,6 +44,22 @@ export default function LoginForm() {
         }
       })
       .finally(() => setLoading(false));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    performLogin({
+      username: formValues.username.trim().toLowerCase(),
+      password: formValues.password,
+    });
+  };
+
+  const handleDemoLogin = (event) => {
+    event.preventDefault();
+    performLogin({
+      username: 'recruiter',
+      password: 'demo123',
+    });
   };
 
   return (
@@ -89,6 +100,18 @@ export default function LoginForm() {
 
       <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={loading} onClick={handleSubmit}>
         Log in
+      </LoadingButton>
+
+      <LoadingButton
+        fullWidth
+        size="large"
+        variant="outlined"
+        color="secondary"
+        loading={loading}
+        onClick={handleDemoLogin}
+        sx={{ mt: 2 }}
+      >
+        Demo Recruiter Login
       </LoadingButton>
     </>
   );
