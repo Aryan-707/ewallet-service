@@ -7,8 +7,7 @@ const postWithoutAuth = (url, body) => {
 };
 
 const getWithAuth = (url) => {
-  const request = axios.get(url, { headers: AuthHeader() });
-  return request.then((response) => response.data);
+  return axios.get(url, { headers: AuthHeader() });
 };
 
 const postWithAuth = (url, body) => {

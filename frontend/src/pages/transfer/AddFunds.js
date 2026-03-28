@@ -33,8 +33,8 @@ export default function AddFunds() {
   useEffect(() => {
     const userId = AuthService.getCurrentUser()?.id;
     HttpService.getWithAuth(`/wallets/users/${userId}`).then((result) => {
-      setFromWalletIbans(result.data);
-    });
+      setFromWalletIbans(Array.isArray(result.data) ? result.data : []);
+    }).catch(() => {});
   }, []);
 
   const handleWalletChange = (event) => {

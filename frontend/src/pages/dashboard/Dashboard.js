@@ -13,7 +13,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     HttpService.getWithAuth('/wallets/stats')
-      .then(res => setStats(res || { totalWallets: 0, totalTransactions: 0, totalUsers: 0 }))
+      .then(res => setStats(res.data || { totalWallets: 0, totalTransactions: 0, totalUsers: 0 }))
       .catch(err => console.error('Stats fetch failed', err));
   }, []);
 

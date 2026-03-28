@@ -65,19 +65,26 @@ export default function Wallet() {
 
   const fetchData = () => {
     const userId = AuthService.getCurrentUser()?.id;
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
     HttpService.getWithAuth(`/wallets/users/${userId}`)
       .then((response) => {
-        setData(response.data);
+        setData(Array.isArray(response.data) ? response.data : []);
       })
       .catch((error) => {
         if (error?.response?.status === 401) {
+          AuthService.logout();
           navigate('/login');
+        } else if (error?.response?.status === 403) {
+          enqueueSnackbar('Access denied. You do not have permission.', { variant: 'warning' });
         } else if (error.response?.data?.errors) {
           error.response?.data?.errors.map((e) => enqueueSnackbar(e.message, { variant: 'error' }));
         } else if (error.response?.data?.message) {
           enqueueSnackbar(error.response?.data?.message, { variant: 'error' });
         } else {
-          enqueueSnackbar(error.message, { variant: 'error' });
+          enqueueSnackbar(error.message || 'Failed to load wallets', { variant: 'error' });
         }
       });
   };
