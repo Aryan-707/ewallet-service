@@ -32,7 +32,7 @@ public class TransactionController {
      * @return TransactionResponse wrapped by ResponseEntity<T>
      */
     @Operation(summary = "Find transaction by id", description = "Fetches a single transaction by the given id")
-    @PreAuthorize("hasRole(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
+    @PreAuthorize("hasAuthority(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> findById(@PathVariable long id) {
         final TransactionResponse response = transactionService.findById(id);
@@ -46,7 +46,7 @@ public class TransactionController {
      * @return TransactionResponse wrapped by ResponseEntity<T>
      */
     @Operation(summary = "Find transaction by reference", description = "Fetches a single transaction by the given referenceNumber")
-    @PreAuthorize("hasRole(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
+    @PreAuthorize("hasAuthority(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
     @GetMapping("/references/{referenceNumber}")
     public ResponseEntity<TransactionResponse> findByReferenceNumber(@PathVariable UUID referenceNumber) {
         final TransactionResponse response = transactionService.findByReferenceNumber(referenceNumber);
@@ -60,7 +60,7 @@ public class TransactionController {
      * @return List of TransactionResponse wrapped by ResponseEntity<T>
      */
     @Operation(summary = "Find transactions by user", description = "Paginated fetching of transactions by user id")
-    @PreAuthorize("hasRole(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
+    @PreAuthorize("hasAuthority(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
     @GetMapping("/users/{userId}")
     public ResponseEntity<Page<TransactionResponse>> findAllByUserId(@PathVariable long userId, org.springframework.data.domain.Pageable pageable) {
         final Page<TransactionResponse> response = transactionService.findAllByUserId(userId, pageable);
@@ -74,7 +74,7 @@ public class TransactionController {
      * @return List of TransactionResponse wrapped by ResponseEntity<T>
      */
     @Operation(summary = "Find all transactions", description = "Paginated fetching of all transactions")
-    @PreAuthorize("hasRole(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
+    @PreAuthorize("hasAuthority(T(com.ewallet.domain.enums.RoleType).ROLE_USER)")
     @GetMapping
     public ResponseEntity<Page<TransactionResponse>> findAll(Pageable pageable) {
         final Page<TransactionResponse> response = transactionService.findAll(pageable);
