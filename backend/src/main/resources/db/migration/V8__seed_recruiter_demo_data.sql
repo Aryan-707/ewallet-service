@@ -255,9 +255,9 @@ BEGIN
   VALUES (le2, rec_wallet1, 'CREDIT', 150.00, t10, NOW() - INTERVAL '1 day');
 
   -- ── reset sequences ───────────────────────────────────────────
-  SELECT setval('wallet_seq',      (SELECT MAX(id) FROM wallet));
-  SELECT setval('transaction_seq', (SELECT MAX(id) FROM transaction));
-  SELECT setval('ledger_entry_seq',(SELECT MAX(id) FROM ledger_entry));
+  PERFORM setval('wallet_seq',      (SELECT MAX(id) FROM wallet));
+  PERFORM setval('transaction_seq', (SELECT MAX(id) FROM transaction));
+  PERFORM setval('ledger_entry_seq',(SELECT MAX(id) FROM ledger_entry));
 
   RAISE NOTICE 'V8 demo seed complete. Recruiter user_id = %', rec_user_id;
 END $$;
